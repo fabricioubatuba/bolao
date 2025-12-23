@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bolão Mega Sena da Virada</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(to right, #1a5f23, #2e7d32);
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            font-size: 2.2rem;
+        }
+        
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .logo span {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .auth-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .btn-login {
+            background-color: white;
+            color: #1a5f23;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-login:hover {
+            background-color: #f0f0f0;
+            transform: translateY(-2px);
+        }
+        
+        .btn-logout {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Navegação */
+        nav {
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 80px;
+            z-index: 99;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            list-style: none;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .nav-tabs li {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .nav-tabs a {
+            display: block;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            color: #555;
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .nav-tabs a:hover {
+            color: #2e7d32;
+            background-color: #f9f9f9;
+        }
+        
+        .nav-tabs a.active {
+            color: #2e7d32;
+            border-bottom-color: #2e7d32;
+            background-color: #f1f8e9;
+        }
+        
+        /* Seções */
+        .section {
+            display: none;
+            padding: 2rem 0;
+            animation: fadeIn 0.5s;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .section-header h2 {
+            font-size: 1.8rem;
+            color: #2e7d32;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-add {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-add:hover {
+            background-color: #1b5e20;
+            transform: translateY(-2px);
+        }
+        
+        .btn-add:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Cards */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-edit {
+            color: #ff9800;
+        }
+        
+        .btn-edit:hover {
+            background-color: #fff3e0;
+        }
+        
+        .btn-delete {
+            color: #f44336;
+        }
+        
+        .btn-delete:hover {
+            background-color: #ffebee;
+        }
+        
+        /* Jogos */
+        .dezenas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 1rem;
+        }
+        
+        .dezena {
+            background-color: #2e7d32;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .dezena.sorteada {
+            background-color: #f44336;
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+        }
+        
+        /* Valores */
+        .valores-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .valor-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .valor-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #2e7d32;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .valor-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .valor-total {
+            font-weight: 700;
+            color: #2e7d32;
+            font-size: 1.2rem;
+        }
+        
+        /* Sorteio */
+        .sorteio-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .sorteio-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .sorteio-dezenas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+        
+        .sorteio-dezena {
+            background-color: #ff9800;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalFadeIn 0.3s;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            color: #2e7d32;
+            font-size: 1.5rem;
+        }
+        
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #777;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #2e7d32;
+        }
+        
+        .dezenas-input {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+        }
+        
+        .dezenas-input input {
+            text-align: center;
+            padding: 12px 5px;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #2e7d32;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1b5e20;
+        }
+        
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #555;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+        
+        /* Login Modal */
+        .login-modal .modal-content {
+            max-width: 400px;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .nav-tabs {
+                justify-content: flex-start;
+            }
+            
+            .nav-tabs li {
+                min-width: 100px;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .dezenas-input {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .sorteio-dezena {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+            
+            .dezenas-input {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* Estado vazio */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #777;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ccc;
+        }
+        
+        /* Admin indicador */
+        .admin-badge {
+            background-color: #ff9800;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        /* Status */
+        .status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status.pago {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status.pendente {
+            background-color: #ffebee;
+            color: #f44336;
+        }
+        
+        /* Alertas */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #2e7d32;
+        }
+        
+        .alert-error {
+            background-color: #ffebee;
+            color: #f44336;
+            border-left: 4px solid #f44336;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 15px;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        
+        .legend-normal {
+            background-color: #2e7d32;
+        }
+        
+        .legend-sorteada {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-trophy"></i>
+                    <div>
+                        <h1>Bolão Mega Sena</h1>
+                        <span>Mega Sena da Virada - Controle Familiar</span>
+                    </div>
+                </div>
+                <div class="auth-section">
+                    <div id="userInfo" class="user-info" style="display: none;">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="userEmail"></span>
+                        <span class="admin-badge">ADMIN</span>
+                        <button id="btnLogout" class="btn-logout">Sair</button>
+                    </div>
+                    <button id="btnLogin" class="btn-login">
+                        <i class="fas fa-sign-in-alt"></i> Admin Login
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navegação -->
+    <nav>
+        <div class="container">
+            <ul class="nav-tabs">
+                <li><a href="#participantes" class="active">Participantes</a></li>
+                <li><a href="#jogos">Jogos</a></li>
+                <li><a href="#valores">Valores</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <main class="container">
+        <!-- Seção Participantes -->
+        <section id="participantes" class="section active">
+            <div class="section-header">
+                <h2><i class="fas fa-users"></i> Participantes</h2>
+                <button id="btnAddParticipante" class="btn-add" disabled>
+                    <i class="fas fa-plus"></i> Adicionar Participante
+                </button>
+            </div>
+            
+            <div id="alertParticipantes" class="alert" style="display: none;"></div>
+            
+            <div id="participantesContainer" class="cards-container">
+                <!-- Participantes serão carregados aqui -->
+                <div class="empty-state">
+                    <i class="fas fa-users"></i>
+                    <h3>Nenhum participante cadastrado</h3>
+                    <p>Adicione participantes ao bolão clicando no botão acima</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Jogos -->
+        <section id="jogos" class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-ticket-alt"></i> Jogos</h2>
+                <button id="btnAddJogo" class="btn-add" disabled>
+                    <i class="fas fa-plus"></i> Adicionar Jogo
+                </button>
+            </div>
+            
+            <div id="alertJogos" class="alert" style="display: none;"></div>
+            
+            <!-- Seção de Dezenas Sorteadas -->
+            <div class="sorteio-section">
+                <div class="sorteio-header">
+                    <h3><i class="fas fa-dice"></i> Dezenas Sorteadas</h3>
+                    <button id="btnGerenciarSorteio" class="btn-add" disabled>
+                        <i class="fas fa-edit"></i> Gerenciar Sorteio
+                    </button>
+                </div>
+                
+                <p>Adicione as dezenas sorteadas para destacar nos jogos cadastrados:</p>
+                
+                <div id="sorteioDezenasContainer" class="sorteio-dezenas">
+                    <div class="empty-state" style="padding: 1rem;">
+                        <i class="fas fa-dice"></i>
+                        <p>Nenhuma dezena sorteada cadastrada ainda</p>
+                    </div>
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color legend-normal"></div>
+                        <span>Dezena normal</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-sorteada"></div>
+                        <span>Dezena sorteada</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="jogosContainer" class="cards-container">
+                <!-- Jogos serão carregados aqui -->
+                <div class="empty-state">
+                    <i class="fas fa-ticket-alt"></i>
+                    <h3>Nenhum jogo cadastrado</h3>
+                    <p>Adicione jogos ao bolão clicando no botão acima</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Valores -->
+        <section id="valores" class="section">
+            <div class="section-header">
+                <h2><i class="fas fa-money-bill-wave"></i> Valores e Premiação</h2>
+            </div>
+            
+            <div id="alertValores" class="alert" style="display: none;"></div>
+            
+            <div class="valores-container">
+                <div class="valor-card">
+                    <h3><i class="fas fa-chart-bar"></i> Resumo</h3>
+                    <div class="valor-item">
+                        <span>Total de Participantes:</span>
+                        <span id="totalParticipantes">0</span>
+                    </div>
+                    <div class="valor-item">
+                        <span>Total de Jogos:</span>
+                        <span id="totalJogos">0</span>
+                    </div>
+                    <div class="valor-item">
+                        <span>Valor por Jogo:</span>
+                        <span>R$ 6,00</span>
+                    </div>
+                </div>
+                
+                <div class="valor-card">
+                    <h3><i class="fas fa-calculator"></i> Custos</h3>
+                    <div class="valor-item">
+                        <span>Custo Total dos Jogos:</span>
+                        <span id="custoTotal">R$ 0,00</span>
+                    </div>
+                    <div class="valor-item">
+                        <span>Valor por Participante:</span>
+                        <span id="valorPorParticipante">R$ 0,00</span>
+                    </div>
+                    <div class="valor-item valor-total">
+                        <span>Total a Pagar:</span>
+                        <span id="totalPagar">R$ 0,00</span>
+                    </div>
+                </div>
+                
+                <div class="valor-card">
+                    <h3><i class="fas fa-trophy"></i> Premiação</h3>
+                    <div class="valor-item">
+                        <span>Prêmio Total (estimado):</span>
+                        <span>R$ 1.000.000.000,00</span>
+                    </div>
+                    <div class="valor-item">
+                        <span>Valor por Participante:</span>
+                        <span id="premioPorParticipante">R$ 0,00</span>
+                    </div>
+                    <div class="valor-item valor-total">
+                        <span>Premiação por Jogo:</span>
+                        <span id="premioPorJogo">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="valor-card" style="margin-top: 20px;">
+                <h3><i class="fas fa-info-circle"></i> Informações</h3>
+                <p style="margin-top: 10px;">Os valores são calculados automaticamente com base nos participantes e jogos cadastrados. Cada jogo custa R$ 6,00. O prêmio total da Mega Sena da Virada é estimado em 1 bilhão de reais.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Login -->
+    <div id="loginModal" class="modal login-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Login Administrativo</h3>
+                <button class="btn-close" id="closeLoginModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="loginEmail">E-mail</label>
+                    <input type="email" id="loginEmail" class="form-control" placeholder="Digite seu e-mail">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Senha</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="Digite sua senha">
+                </div>
+                <div id="loginAlert" class="alert" style="display: none;"></div>
+                <div class="modal-footer">
+                    <button id="btnCancelLogin" class="btn btn-secondary">Cancelar</button>
+                    <button id="btnConfirmLogin" class="btn btn-primary">Entrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Participante -->
+    <div id="participanteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="participanteModalTitle">Adicionar Participante</h3>
+                <button class="btn-close" id="closeParticipanteModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="participanteNome">Nome do Participante</label>
+                    <input type="text" id="participanteNome" class="form-control" placeholder="Digite o nome do participante">
+                </div>
+                <div id="participanteAlert" class="alert" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCancelParticipante" class="btn btn-secondary">Cancelar</button>
+                <button id="btnSaveParticipante" class="btn btn-primary">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Jogo -->
+    <div id="jogoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="jogoModalTitle">Adicionar Jogo</h3>
+                <button class="btn-close" id="closeJogoModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Dezenas (6 números de 01 a 60)</label>
+                    <div class="dezenas-input">
+                        <input type="number" min="1" max="60" class="form-control dezena-input" placeholder="01">
+                        <input type="number" min="1" max="60" class="form-control dezena-input" placeholder="02">
+                        <input type="number" min="1" max="60" class="form-control dezena-input" placeholder="03">
+                        <input type="number" min="1" max="60" class="form-control dezena-input" placeholder="04">
+                        <input type="number" min="1" max="60" class="form-control dezena-input" placeholder="05">
+                        <input type="number" min="1" max="60" class="form-control dezena-input" placeholder="06">
+                    </div>
+                </div>
+                <div id="jogoAlert" class="alert" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCancelJogo" class="btn btn-secondary">Cancelar</button>
+                <button id="btnSaveJogo" class="btn btn-primary">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Sorteio -->
+    <div id="sorteioModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Gerenciar Dezenas Sorteadas</h3>
+                <button class="btn-close" id="closeSorteioModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Dezenas Sorteadas (até 6 números de 01 a 60)</label>
+                    <div class="dezenas-input">
+                        <input type="number" min="1" max="60" class="form-control sorteio-input" placeholder="01">
+                        <input type="number" min="1" max="60" class="form-control sorteio-input" placeholder="02">
+                        <input type="number" min="1" max="60" class="form-control sorteio-input" placeholder="03">
+                        <input type="number" min="1" max="60" class="form-control sorteio-input" placeholder="04">
+                        <input type="number" min="1" max="60" class="form-control sorteio-input" placeholder="05">
+                        <input type="number" min="1" max="60" class="form-control sorteio-input" placeholder="06">
+                    </div>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">Preencha apenas as dezenas que foram sorteadas. Deixe em branco as que não foram sorteadas.</p>
+                </div>
+                <div id="sorteioAlert" class="alert" style="display: none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnCancelSorteio" class="btn btn-secondary">Cancelar</button>
+                <button id="btnSaveSorteio" class="btn btn-primary">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>Bolão Mega Sena da Virada &copy; 2023 - Desenvolvido para a família</p>
+            <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">Utilize o login admin para editar informações</p>
+        </div>
+    </footer>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZqXrKnRGvM0BG5qrrE38R8zR25tacOzw",
+            authDomain: "teste-c702e.firebaseapp.com",
+            databaseURL: "https://teste-c702e-default-rtdb.firebaseio.com",
+            projectId: "teste-c702e",
+            storageBucket: "teste-c702e.firebasestorage.app",
+            messagingSenderId: "478905955045",
+            appId: "1:478905955045:web:aa6e49585f2ea5e1e85a0c"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+        
+        // Estados da aplicação
+        let currentUser = null;
+        let isAdmin = false;
+        let participantes = [];
+        let jogos = [];
+        let dezenasSorteadas = [];
+        let editParticipanteId = null;
+        let editJogoId = null;
+        
+        // Referências do DOM
+        const navTabs = document.querySelectorAll('.nav-tabs a');
+        const sections = document.querySelectorAll('.section');
+        
+        // Elementos de login
+        const btnLogin = document.getElementById('btnLogin');
+        const btnLogout = document.getElementById('btnLogout');
+        const userInfo = document.getElementById('userInfo');
+        const userEmail = document.getElementById('userEmail');
+        
+        // Modais
+        const loginModal = document.getElementById('loginModal');
+        const participanteModal = document.getElementById('participanteModal');
+        const jogoModal = document.getElementById('jogoModal');
+        const sorteioModal = document.getElementById('sorteioModal');
+        
+        // Botões de ação
+        const btnAddParticipante = document.getElementById('btnAddParticipante');
+        const btnAddJogo = document.getElementById('btnAddJogo');
+        const btnGerenciarSorteio = document.getElementById('btnGerenciarSorteio');
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar navegação por tabs
+            navTabs.forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remover classe active de todas as tabs
+                    navTabs.forEach(t => t.classList.remove('active'));
+                    
+                    // Adicionar classe active à tab clicada
+                    this.classList.add('active');
+                    
+                    // Esconder todas as seções
+                    sections.forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    
+                    // Mostrar a seção correspondente
+                    const target = this.getAttribute('href').substring(1);
+                    document.getElementById(target).classList.add('active');
+                });
+            });
+            
+            // Configurar autenticação
+            initAuth();
+            
+            // Configurar listeners dos modais
+            initModals();
+            
+            // Carregar dados do Firebase
+            loadData();
+        });
+        
+        // Função para inicializar autenticação
+        function initAuth() {
+            // Configurar botão de login
+            btnLogin.addEventListener('click', showLoginModal);
+            btnLogout.addEventListener('click', logout);
+            
+            // Monitorar estado de autenticação
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    // Usuário logado
+                    currentUser = user;
+                    
+                    // Verificar se é admin
+                    const adminEmails = [
+                        'aline@ramos.com',
+                        'fabio@ramos.com',
+                        'bioranss@gmail.com'
+                    ];
+                    
+                    isAdmin = adminEmails.includes(user.email);
+                    
+                    // Atualizar interface
+                    userEmail.textContent = user.email;
+                    userInfo.style.display = 'flex';
+                    btnLogin.style.display = 'none';
+                    
+                    // Habilitar botões de adição se for admin
+                    if (isAdmin) {
+                        btnAddParticipante.disabled = false;
+                        btnAddJogo.disabled = false;
+                        btnGerenciarSorteio.disabled = false;
+                    }
+                    
+                    // Fechar modal de login se estiver aberto
+                    loginModal.classList.remove('active');
+                } else {
+                    // Usuário não logado
+                    currentUser = null;
+                    isAdmin = false;
+                    
+                    // Atualizar interface
+                    userInfo.style.display = 'none';
+                    btnLogin.style.display = 'flex';
+                    
+                    // Desabilitar botões de adição
+                    btnAddParticipante.disabled = true;
+                    btnAddJogo.disabled = true;
+                    btnGerenciarSorteio.disabled = true;
+                }
+            });
+        }
+        
+        // Função para inicializar modais
+        function initModals() {
+            // Login Modal
+            document.getElementById('closeLoginModal').addEventListener('click', () => {
+                loginModal.classList.remove('active');
+            });
+            
+            document.getElementById('btnCancelLogin').addEventListener('click', () => {
+                loginModal.classList.remove('active');
+            });
+            
+            document.getElementById('btnConfirmLogin').addEventListener('click', login);
+            
+            // Permitir login com Enter
+            document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    login();
+                }
+            });
+            
+            // Participante Modal
+            btnAddParticipante.addEventListener('click', () => {
+                editParticipanteId = null;
+                document.getElementById('participanteModalTitle').textContent = 'Adicionar Participante';
+                document.getElementById('participanteNome').value = '';
+                document.getElementById('participanteAlert').style.display = 'none';
+                participanteModal.classList.add('active');
+            });
+            
+            document.getElementById('closeParticipanteModal').addEventListener('click', () => {
+                participanteModal.classList.remove('active');
+            });
+            
+            document.getElementById('btnCancelParticipante').addEventListener('click', () => {
+                participanteModal.classList.remove('active');
+            });
+            
+            document.getElementById('btnSaveParticipante').addEventListener('click', saveParticipante);
+            
+            // Permitir salvar com Enter
+            document.getElementById('participanteNome').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    saveParticipante();
+                }
+            });
+            
+            // Jogo Modal
+            btnAddJogo.addEventListener('click', () => {
+                editJogoId = null;
+                document.getElementById('jogoModalTitle').textContent = 'Adicionar Jogo';
+                
+                // Limpar dezenas
+                document.querySelectorAll('.dezena-input').forEach(input => {
+                    input.value = '';
+                });
+                
+                document.getElementById('jogoAlert').style.display = 'none';
+                jogoModal.classList.add('active');
+            });
+            
+            document.getElementById('closeJogoModal').addEventListener('click', () => {
+                jogoModal.classList.remove('active');
+            });
+            
+            document.getElementById('btnCancelJogo').addEventListener('click', () => {
+                jogoModal.classList.remove('active');
+            });
+            
+            document.getElementById('btnSaveJogo').addEventListener('click', saveJogo);
+            
+            // Sorteio Modal
+            btnGerenciarSorteio.addEventListener('click', () => {
+                // Preencher com as dezenas já sorteadas
+                const sorteioInputs = document.querySelectorAll('.sorteio-input');
+                sorteioInputs.forEach((input, index) => {
+                    input.value = dezenasSorteadas[index] || '';
+                });
+                
+                document.getElementById('sorteioAlert').style.display = 'none';
+                sorteioModal.classList.add('active');
+            });
+            
+            document.getElementById('closeSorteioModal').addEventListener('click', () => {
+                sorteioModal.classList.remove('active');
+            });
+            
+            document.getElementById('btnCancelSorteio').addEventListener('click', () => {
+                sorteioModal.classList.remove('active');
+            });
+            
+            document.getElementById('btnSaveSorteio').addEventListener('click', saveSorteio);
+            
+            // Fechar modais ao clicar fora
+            window.addEventListener('click', (e) => {
+                if (e.target === loginModal) {
+                    loginModal.classList.remove('active');
+                }
+                if (e.target === participanteModal) {
+                    participanteModal.classList.remove('active');
+                }
+                if (e.target === jogoModal) {
+                    jogoModal.classList.remove('active');
+                }
+                if (e.target === sorteioModal) {
+                    sorteioModal.classList.remove('active');
+                }
+            });
+        }
+        
+        // Função para mostrar modal de login
+        function showLoginModal() {
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginAlert').style.display = 'none';
+            loginModal.classList.add('active');
+        }
+        
+        // Função para fazer login
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const loginAlert = document.getElementById('loginAlert');
+            
+            if (!email || !password) {
+                loginAlert.textContent = 'Por favor, preencha todos os campos.';
+                loginAlert.className = 'alert alert-error';
+                loginAlert.style.display = 'flex';
+                return;
+            }
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    // Login bem sucedido - o listener onAuthStateChanged cuidará do resto
+                })
+                .catch(error => {
+                    let errorMessage = 'Erro ao fazer login. Verifique suas credenciais.';
+                    
+                    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                        errorMessage = 'E-mail ou senha incorretos.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage = 'E-mail inválido.';
+                    }
+                    
+                    loginAlert.textContent = errorMessage;
+                    loginAlert.className = 'alert alert-error';
+                    loginAlert.style.display = 'flex';
+                });
+        }
+        
+        // Função para fazer logout
+        function logout() {
+            auth.signOut();
+        }
+        
+        // Função para carregar dados do Firebase
+        function loadData() {
+            // Carregar participantes
+            database.ref('bolao/participantes').on('value', (snapshot) => {
+                participantes = [];
+                const data = snapshot.val();
+                
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        participantes.push({
+                            id: key,
+                            ...data[key]
+                        });
+                    });
+                }
+                
+                renderParticipantes();
+                updateValores();
+            });
+            
+            // Carregar jogos
+            database.ref('bolao/jogos').on('value', (snapshot) => {
+                jogos = [];
+                const data = snapshot.val();
+                
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        jogos.push({
+                            id: key,
+                            ...data[key]
+                        });
+                    });
+                }
+                
+                renderJogos();
+                updateValores();
+            });
+            
+            // Carregar dezenas sorteadas
+            database.ref('bolao/sorteio').on('value', (snapshot) => {
+                dezenasSorteadas = [];
+                const data = snapshot.val();
+                
+                if (data && data.dezenas) {
+                    dezenasSorteadas = data.dezenas.filter(d => d !== null && d !== '');
+                }
+                
+                renderSorteio();
+                
+                // Atualizar cores dos jogos existentes
+                if (jogos.length > 0) {
+                    renderJogos();
+                }
+            });
+        }
+        
+        // Função para renderizar participantes
+        function renderParticipantes() {
+            const container = document.getElementById('participantesContainer');
+            
+            if (participantes.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <h3>Nenhum participante cadastrado</h3>
+                        <p>Adicione participantes ao bolão clicando no botão acima</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            participantes.forEach(participante => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-title">${participante.nome}</div>
+                        ${isAdmin ? `
+                            <div class="card-actions">
+                                <button class="btn-action btn-edit" data-id="${participante.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-action btn-delete" data-id="${participante.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="card-body">
+                        <p>Participante desde: ${new Date().toLocaleDateString('pt-BR')}</p>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            // Adicionar eventos aos botões de edição/exclusão
+            if (isAdmin) {
+                document.querySelectorAll('.btn-edit').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.currentTarget.getAttribute('data-id');
+                        editParticipante(id);
+                    });
+                });
+                
+                document.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.currentTarget.getAttribute('data-id');
+                        deleteParticipante(id);
+                    });
+                });
+            }
+        }
+        
+        // Função para renderizar jogos
+        function renderJogos() {
+            const container = document.getElementById('jogosContainer');
+            
+            if (jogos.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-ticket-alt"></i>
+                        <h3>Nenhum jogo cadastrado</h3>
+                        <p>Adicione jogos ao bolão clicando no botão acima</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            jogos.forEach(jogo => {
+                // Formatar dezenas com dois dígitos
+                const dezenas = jogo.dezenas.map(d => d.toString().padStart(2, '0'));
+                
+                // Verificar quais dezenas foram sorteadas
+                const dezenasElementos = dezenas.map(dezena => {
+                    const numero = parseInt(dezena);
+                    const sorteada = dezenasSorteadas.includes(numero);
+                    return `<div class="dezena ${sorteada ? 'sorteada' : ''}">${dezena}</div>`;
+                }).join('');
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-title">Jogo #${jogo.id.substring(0, 8)}</div>
+                        ${isAdmin ? `
+                            <div class="card-actions">
+                                <button class="btn-action btn-edit" data-id="${jogo.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-action btn-delete" data-id="${jogo.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Dezenas:</strong></p>
+                        <div class="dezenas">
+                            ${dezenasElementos}
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+            
+            // Adicionar eventos aos botões de edição/exclusão
+            if (isAdmin) {
+                document.querySelectorAll('.btn-edit').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.currentTarget.getAttribute('data-id');
+                        editJogo(id);
+                    });
+                });
+                
+                document.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.currentTarget.getAttribute('data-id');
+                        deleteJogo(id);
+                    });
+                });
+            }
+        }
+        
+        // Função para renderizar as dezenas sorteadas
+        function renderSorteio() {
+            const container = document.getElementById('sorteioDezenasContainer');
+            
+            if (dezenasSorteadas.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="padding: 1rem;">
+                        <i class="fas fa-dice"></i>
+                        <p>Nenhuma dezena sorteada cadastrada ainda</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            // Ordenar dezenas
+            const dezenasOrdenadas = [...dezenasSorteadas].sort((a, b) => a - b);
+            
+            dezenasOrdenadas.forEach(dezena => {
+                const dezenaElement = document.createElement('div');
+                dezenaElement.className = 'sorteio-dezena';
+                dezenaElement.textContent = dezena.toString().padStart(2, '0');
+                container.appendChild(dezenaElement);
+            });
+        }
+        
+        // Função para atualizar a seção de valores
+        function updateValores() {
+            const totalParticipantes = participantes.length;
+            const totalJogos = jogos.length;
+            const custoTotal = totalJogos * 6;
+            const valorPorParticipante = totalParticipantes > 0 ? custoTotal / totalParticipantes : 0;
+            
+            // Prêmio total da Mega Sena da Virada (1 bilhão)
+            const premioTotal = 1000000000;
+            const premioPorParticipante = totalParticipantes > 0 ? premioTotal / totalParticipantes : 0;
+            const premioPorJogo = totalJogos > 0 ? premioTotal / totalJogos : 0;
+            
+            // Atualizar elementos
+            document.getElementById('totalParticipantes').textContent = totalParticipantes;
+            document.getElementById('totalJogos').textContent = totalJogos;
+            document.getElementById('custoTotal').textContent = formatCurrency(custoTotal);
+            document.getElementById('valorPorParticipante').textContent = formatCurrency(valorPorParticipante);
+            document.getElementById('totalPagar').textContent = formatCurrency(custoTotal);
+            document.getElementById('premioPorParticipante').textContent = formatCurrency(premioPorParticipante);
+            document.getElementById('premioPorJogo').textContent = formatCurrency(premioPorJogo);
+        }
+        
+        // Função para formatar moeda
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+        
+        // Função para editar participante
+        function editParticipante(id) {
+            const participante = participantes.find(p => p.id === id);
+            
+            if (participante) {
+                editParticipanteId = id;
+                document.getElementById('participanteModalTitle').textContent = 'Editar Participante';
+                document.getElementById('participanteNome').value = participante.nome;
+                document.getElementById('participanteAlert').style.display = 'none';
+                participanteModal.classList.add('active');
+            }
+        }
+        
+        // Função para salvar participante
+        function saveParticipante() {
+            const nome = document.getElementById('participanteNome').value.trim();
+            const alert = document.getElementById('participanteAlert');
+            
+            if (!nome) {
+                alert.textContent = 'Por favor, digite um nome para o participante.';
+                alert.className = 'alert alert-error';
+                alert.style.display = 'flex';
+                return;
+            }
+            
+            if (editParticipanteId) {
+                // Atualizar participante existente
+                database.ref(`bolao/participantes/${editParticipanteId}`).update({
+                    nome: nome
+                }).then(() => {
+                    participanteModal.classList.remove('active');
+                    showAlert('participantes', 'Participante atualizado com sucesso!', 'success');
+                }).catch(error => {
+                    alert.textContent = 'Erro ao atualizar participante. Tente novamente.';
+                    alert.className = 'alert alert-error';
+                    alert.style.display = 'flex';
+                });
+            } else {
+                // Adicionar novo participante
+                const newParticipanteRef = database.ref('bolao/participantes').push();
+                newParticipanteRef.set({
+                    nome: nome
+                }).then(() => {
+                    participanteModal.classList.remove('active');
+                    showAlert('participantes', 'Participante adicionado com sucesso!', 'success');
+                }).catch(error => {
+                    alert.textContent = 'Erro ao adicionar participante. Tente novamente.';
+                    alert.className = 'alert alert-error';
+                    alert.style.display = 'flex';
+                });
+            }
+        }
+        
+        // Função para excluir participante
+        function deleteParticipante(id) {
+            if (confirm('Tem certeza que deseja excluir este participante? Esta ação não pode ser desfeita.')) {
+                // Verificar se o participante tem jogos associados
+                const jogosDoParticipante = jogos.filter(jogo => jogo.participanteId === id);
+                
+                if (jogosDoParticipante.length > 0) {
+                    alert('Não é possível excluir este participante porque ele tem jogos associados. Exclua os jogos primeiro.');
+                    return;
+                }
+                
+                database.ref(`bolao/participantes/${id}`).remove()
+                    .then(() => {
+                        showAlert('participantes', 'Participante excluído com sucesso!', 'success');
+                    })
+                    .catch(error => {
+                        showAlert('participantes', 'Erro ao excluir participante. Tente novamente.', 'error');
+                    });
+            }
+        }
+        
+        // Função para editar jogo
+        function editJogo(id) {
+            const jogo = jogos.find(j => j.id === id);
+            
+            if (jogo) {
+                editJogoId = id;
+                document.getElementById('jogoModalTitle').textContent = 'Editar Jogo';
+                
+                // Preencher dezenas
+                const dezenaInputs = document.querySelectorAll('.dezena-input');
+                jogo.dezenas.forEach((dezena, index) => {
+                    if (dezenaInputs[index]) {
+                        dezenaInputs[index].value = dezena;
+                    }
+                });
+                
+                document.getElementById('jogoAlert').style.display = 'none';
+                jogoModal.classList.add('active');
+            }
+        }
+        
+        // Função para salvar jogo
+        function saveJogo() {
+            const dezenaInputs = document.querySelectorAll('.dezena-input');
+            const dezenas = [];
+            const alert = document.getElementById('jogoAlert');
+            
+            // Validar dezenas
+            for (let i = 0; i < dezenaInputs.length; i++) {
+                const value = parseInt(dezenaInputs[i].value);
+                
+                if (isNaN(value) || value < 1 || value > 60) {
+                    alert.textContent = `Por favor, digite um número válido (01-60) para a dezena ${i + 1}.`;
+                    alert.className = 'alert alert-error';
+                    alert.style.display = 'flex';
+                    return;
+                }
+                
+                // Verificar duplicatas
+                if (dezenas.includes(value)) {
+                    alert.textContent = 'Não é permitido repetir números. Por favor, digite 6 números diferentes.';
+                    alert.className = 'alert alert-error';
+                    alert.style.display = 'flex';
+                    return;
+                }
+                
+                dezenas.push(value);
+            }
+            
+            // Ordenar dezenas
+            dezenas.sort((a, b) => a - b);
+            
+            if (editJogoId) {
+                // Atualizar jogo existente
+                database.ref(`bolao/jogos/${editJogoId}`).update({
+                    dezenas: dezenas
+                }).then(() => {
+                    jogoModal.classList.remove('active');
+                    showAlert('jogos', 'Jogo atualizado com sucesso!', 'success');
+                }).catch(error => {
+                    alert.textContent = 'Erro ao atualizar jogo. Tente novamente.';
+                    alert.className = 'alert alert-error';
+                    alert.style.display = 'flex';
+                });
+            } else {
+                // Adicionar novo jogo
+                const newJogoRef = database.ref('bolao/jogos').push();
+                newJogoRef.set({
+                    dezenas: dezenas
+                }).then(() => {
+                    jogoModal.classList.remove('active');
+                    showAlert('jogos', 'Jogo adicionado com sucesso!', 'success');
+                }).catch(error => {
+                    alert.textContent = 'Erro ao adicionar jogo. Tente novamente.';
+                    alert.className = 'alert alert-error';
+                    alert.style.display = 'flex';
+                });
+            }
+        }
+        
+        // Função para excluir jogo
+        function deleteJogo(id) {
+            if (confirm('Tem certeza que deseja excluir este jogo? Esta ação não pode ser desfeita.')) {
+                database.ref(`bolao/jogos/${id}`).remove()
+                    .then(() => {
+                        showAlert('jogos', 'Jogo excluído com sucesso!', 'success');
+                    })
+                    .catch(error => {
+                        showAlert('jogos', 'Erro ao excluir jogo. Tente novamente.', 'error');
+                    });
+            }
+        }
+        
+        // Função para salvar dezenas sorteadas
+        function saveSorteio() {
+            const sorteioInputs = document.querySelectorAll('.sorteio-input');
+            const dezenas = [];
+            const alert = document.getElementById('sorteioAlert');
+            
+            // Coletar dezenas (apenas as preenchidas)
+            for (let i = 0; i < sorteioInputs.length; i++) {
+                const value = parseInt(sorteioInputs[i].value);
+                
+                if (!isNaN(value) && value >= 1 && value <= 60) {
+                    // Verificar duplicatas
+                    if (dezenas.includes(value)) {
+                        alert.textContent = 'Não é permitido repetir números nas dezenas sorteadas.';
+                        alert.className = 'alert alert-error';
+                        alert.style.display = 'flex';
+                        return;
+                    }
+                    
+                    dezenas.push(value);
+                }
+            }
+            
+            // Ordenar dezenas
+            dezenas.sort((a, b) => a - b);
+            
+            // Salvar no Firebase
+            database.ref('bolao/sorteio').set({
+                dezenas: dezenas,
+                atualizadoEm: new Date().toISOString()
+            }).then(() => {
+                sorteioModal.classList.remove('active');
+                showAlert('jogos', 'Dezenas sorteadas atualizadas com sucesso!', 'success');
+            }).catch(error => {
+                alert.textContent = 'Erro ao salvar dezenas sorteadas. Tente novamente.';
+                alert.className = 'alert alert-error';
+                alert.style.display = 'flex';
+            });
+        }
+        
+        // Função para mostrar alertas
+        function showAlert(section, message, type) {
+            const alertElement = document.getElementById(`alert${section.charAt(0).toUpperCase() + section.slice(1)}`);
+            
+            if (alertElement) {
+                alertElement.textContent = message;
+                alertElement.className = `alert alert-${type}`;
+                alertElement.style.display = 'flex';
+                
+                // Ocultar alerta após 5 segundos
+                setTimeout(() => {
+                    alertElement.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>
