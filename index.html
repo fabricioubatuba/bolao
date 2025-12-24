@@ -310,80 +310,6 @@
             box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
         }
         
-        /* Valores */
-        .valores-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-        
-        .valor-card {
-            background-color: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-        
-        .valor-card h3 {
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
-            color: #2e7d32;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .valor-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .valor-total {
-            font-weight: 700;
-            color: #2e7d32;
-            font-size: 1.2rem;
-        }
-        
-        /* Sorteio */
-        .sorteio-section {
-            background-color: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-        
-        .sorteio-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .sorteio-dezenas {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 1rem;
-        }
-        
-        .sorteio-dezena {
-            background-color: #ff9800;
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-        
         /* Modal */
         .modal {
             display: none;
@@ -469,7 +395,7 @@
         
         .dezenas-input {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 10px;
         }
         
@@ -638,6 +564,44 @@
             border-left: 4px solid #f44336;
         }
         
+        /* Seção de Sorteio */
+        .sorteio-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .sorteio-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .sorteio-dezenas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+        
+        .sorteio-dezena {
+            background-color: #ff9800;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
         .legend {
             display: flex;
             gap: 15px;
@@ -664,6 +628,17 @@
         
         .legend-sorteada {
             background-color: #de7e10;
+        }
+        
+        /* Instruções */
+        .instrucoes {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #666;
+            border-left: 4px solid #2e7d32;
         }
     </style>
 </head>
@@ -700,7 +675,6 @@
             <ul class="nav-tabs">
                 <li><a href="#participantes" class="active">Participantes</a></li>
                 <li><a href="#jogos">Jogos</a></li>
-                <li><a href="#valores">Valores</a></li>
             </ul>
         </div>
     </nav>
@@ -769,6 +743,10 @@
                 </div>
             </div>
             
+            <div class="instrucoes">
+                <p><strong>Instruções:</strong> Cada jogo pode ter de 6 a 10 dezenas (números de 01 a 60). Preencha apenas os campos que desejar. As dezenas devem ser únicas em cada jogo.</p>
+            </div>
+            
             <div id="jogosContainer" class="cards-container">
                 <!-- Jogos serão carregados aqui -->
                 <div class="empty-state">
@@ -776,70 +754,6 @@
                     <h3>Nenhum jogo cadastrado</h3>
                     <p>Adicione jogos ao bolão clicando no botão acima</p>
                 </div>
-            </div>
-        </section>
-
-        <!-- Seção Valores -->
-        <section id="valores" class="section">
-            <div class="section-header">
-                <h2><i class="fas fa-money-bill-wave"></i> Valores e Premiação</h2>
-            </div>
-            
-            <div id="alertValores" class="alert" style="display: none;"></div>
-            
-            <div class="valores-container">
-                <div class="valor-card">
-                    <h3><i class="fas fa-chart-bar"></i> Resumo</h3>
-                    <div class="valor-item">
-                        <span>Total de Participantes:</span>
-                        <span id="totalParticipantes">0</span>
-                    </div>
-                    <div class="valor-item">
-                        <span>Total de Jogos:</span>
-                        <span id="totalJogos">0</span>
-                    </div>
-                    <div class="valor-item">
-                        <span>Valor por Jogo:</span>
-                        <span>R$ 6,00</span>
-                    </div>
-                </div>
-                
-                <div class="valor-card">
-                    <h3><i class="fas fa-calculator"></i> Custos</h3>
-                    <div class="valor-item">
-                        <span>Custo Total dos Jogos:</span>
-                        <span id="custoTotal">R$ 0,00</span>
-                    </div>
-                    <div class="valor-item">
-                        <span>Valor por Participante:</span>
-                        <span id="valorPorParticipante">R$ 0,00</span>
-                    </div>
-                    <div class="valor-item valor-total">
-                        <span>Total a Pagar:</span>
-                        <span id="totalPagar">R$ 0,00</span>
-                    </div>
-                </div>
-                
-                <div class="valor-card">
-                    <h3><i class="fas fa-trophy"></i> Premiação</h3>
-                    <div class="valor-item">
-                        <span>Prêmio Total (estimado):</span>
-                        <span>R$ 1.000.000.000,00</span>
-                    </div>
-                    <div class="valor-item">
-                        <span>Valor por Participante:</span>
-                        <span id="premioPorParticipante">R$ 0,00</span>
-                    </div>
-                    <div class="valor-item valor-total">
-                        <span>Premiação por Jogo:</span>
-                        <span id="premioPorJogo">R$ 0,00</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="valor-card" style="margin-top: 20px;">
-                <h3><i class="fas fa-info-circle"></i> Informações</h3>
-                <p style="margin-top: 10px;">Os valores são calculados automaticamente com base nos participantes e jogos cadastrados. Cada jogo custa R$ 6,00. O prêmio total da Mega Sena da Virada é estimado em 1 bilhão de reais.</p>
             </div>
         </section>
     </main>
@@ -899,15 +813,11 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Dezenas (6 números de 01 a 60)</label>
-                    <div class="dezenas-input">
-                        <input type="number" min="1" max="60" class="form-control dezena-input" placeholder="01">
-                        <input type="number" min="1" max="60" class="form-control dezena-input" placeholder="02">
-                        <input type="number" min="1" max="60" class="form-control dezena-input" placeholder="03">
-                        <input type="number" min="1" max="60" class="form-control dezena-input" placeholder="04">
-                        <input type="number" min="1" max="60" class="form-control dezena-input" placeholder="05">
-                        <input type="number" min="1" max="60" class="form-control dezena-input" placeholder="06">
+                    <label>Dezenas (de 6 a 10 números de 01 a 60)</label>
+                    <div class="dezenas-input" id="dezenasContainer">
+                        <!-- Inputs serão gerados dinamicamente -->
                     </div>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">Preencha de 6 a 10 números diferentes. Deixe em branco os campos que não deseja usar.</p>
                 </div>
                 <div id="jogoAlert" class="alert" style="display: none;"></div>
             </div>
@@ -1034,7 +944,27 @@
             
             // Carregar dados do Firebase
             loadData();
+            
+            // Criar inputs para as dezenas
+            createDezenaInputs();
         });
+        
+        // Função para criar inputs de dezenas
+        function createDezenaInputs() {
+            const container = document.getElementById('dezenasContainer');
+            container.innerHTML = '';
+            
+            // Criar 10 inputs (para permitir até 10 dezenas)
+            for (let i = 0; i < 10; i++) {
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.min = '1';
+                input.max = '60';
+                input.className = 'form-control dezena-input';
+                input.placeholder = (i + 1).toString().padStart(2, '0');
+                container.appendChild(input);
+            }
+        }
         
         // Função para inicializar autenticação
         function initAuth() {
@@ -1259,7 +1189,6 @@
                 }
                 
                 renderParticipantes();
-                updateValores();
             });
             
             // Carregar jogos
@@ -1277,7 +1206,6 @@
                 }
                 
                 renderJogos();
-                updateValores();
             });
             
             // Carregar dezenas sorteadas
@@ -1376,10 +1304,18 @@
             container.innerHTML = '';
             
             jogos.forEach(jogo => {
-                // Formatar dezenas com dois dígitos
-                const dezenas = jogo.dezenas.map(d => d.toString().padStart(2, '0'));
+                // Formatar dezenas com dois dígitos e filtrar valores vazios
+                const dezenas = jogo.dezenas
+                    .filter(d => d !== null && d !== undefined && d !== '')
+                    .map(d => d.toString().padStart(2, '0'));
                 
-                // Verificar quais dezenas foram sorteadas
+                // Verificar quantas dezenas foram sorteadas
+                const dezenasSorteadasNoJogo = dezenas.filter(dezena => {
+                    const numero = parseInt(dezena);
+                    return dezenasSorteadas.includes(numero);
+                }).length;
+                
+                // Criar elementos de dezenas
                 const dezenasElementos = dezenas.map(dezena => {
                     const numero = parseInt(dezena);
                     const sorteada = dezenasSorteadas.includes(numero);
@@ -1403,10 +1339,16 @@
                         ` : ''}
                     </div>
                     <div class="card-body">
-                        <p><strong>Dezenas:</strong></p>
+                        <p><strong>Dezenas (${dezenas.length} números):</strong></p>
                         <div class="dezenas">
                             ${dezenasElementos}
                         </div>
+                        ${dezenasSorteadasNoJogo > 0 ? `
+                            <p style="margin-top: 10px; font-size: 0.9rem;">
+                                <i class="fas fa-check-circle" style="color: #2e7d32;"></i>
+                                ${dezenasSorteadasNoJogo} dezena(s) sorteada(s)
+                            </p>
+                        ` : ''}
                     </div>
                 `;
                 
@@ -1456,36 +1398,6 @@
                 dezenaElement.textContent = dezena.toString().padStart(2, '0');
                 container.appendChild(dezenaElement);
             });
-        }
-        
-        // Função para atualizar a seção de valores
-        function updateValores() {
-            const totalParticipantes = participantes.length;
-            const totalJogos = jogos.length;
-            const custoTotal = totalJogos * 6;
-            const valorPorParticipante = totalParticipantes > 0 ? custoTotal / totalParticipantes : 0;
-            
-            // Prêmio total da Mega Sena da Virada (1 bilhão)
-            const premioTotal = 1000000000;
-            const premioPorParticipante = totalParticipantes > 0 ? premioTotal / totalParticipantes : 0;
-            const premioPorJogo = totalJogos > 0 ? premioTotal / totalJogos : 0;
-            
-            // Atualizar elementos
-            document.getElementById('totalParticipantes').textContent = totalParticipantes;
-            document.getElementById('totalJogos').textContent = totalJogos;
-            document.getElementById('custoTotal').textContent = formatCurrency(custoTotal);
-            document.getElementById('valorPorParticipante').textContent = formatCurrency(valorPorParticipante);
-            document.getElementById('totalPagar').textContent = formatCurrency(custoTotal);
-            document.getElementById('premioPorParticipante').textContent = formatCurrency(premioPorParticipante);
-            document.getElementById('premioPorJogo').textContent = formatCurrency(premioPorJogo);
-        }
-        
-        // Função para formatar moeda
-        function formatCurrency(value) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(value);
         }
         
         // Função para editar participante
@@ -1544,14 +1456,6 @@
         // Função para excluir participante
         function deleteParticipante(id) {
             if (confirm('Tem certeza que deseja excluir este participante? Esta ação não pode ser desfeita.')) {
-                // Verificar se o participante tem jogos associados
-                const jogosDoParticipante = jogos.filter(jogo => jogo.participanteId === id);
-                
-                if (jogosDoParticipante.length > 0) {
-                    alert('Não é possível excluir este participante porque ele tem jogos associados. Exclua os jogos primeiro.');
-                    return;
-                }
-                
                 database.ref(`bolao/participantes/${id}`).remove()
                     .then(() => {
                         showAlert('participantes', 'Participante excluído com sucesso!', 'success');
@@ -1570,7 +1474,12 @@
                 editJogoId = id;
                 document.getElementById('jogoModalTitle').textContent = 'Editar Jogo';
                 
-                // Preencher dezenas
+                // Limpar todos os inputs primeiro
+                document.querySelectorAll('.dezena-input').forEach(input => {
+                    input.value = '';
+                });
+                
+                // Preencher dezenas existentes
                 const dezenaInputs = document.querySelectorAll('.dezena-input');
                 jogo.dezenas.forEach((dezena, index) => {
                     if (dezenaInputs[index]) {
@@ -1589,26 +1498,36 @@
             const dezenas = [];
             const alert = document.getElementById('jogoAlert');
             
-            // Validar dezenas
+            // Coletar dezenas (apenas as preenchidas)
             for (let i = 0; i < dezenaInputs.length; i++) {
                 const value = parseInt(dezenaInputs[i].value);
                 
-                if (isNaN(value) || value < 1 || value > 60) {
-                    alert.textContent = `Por favor, digite um número válido (01-60) para a dezena ${i + 1}.`;
-                    alert.className = 'alert alert-error';
-                    alert.style.display = 'flex';
-                    return;
+                if (!isNaN(value) && value >= 1 && value <= 60) {
+                    // Verificar duplicatas
+                    if (dezenas.includes(value)) {
+                        alert.textContent = 'Não é permitido repetir números. Por favor, digite números diferentes.';
+                        alert.className = 'alert alert-error';
+                        alert.style.display = 'flex';
+                        return;
+                    }
+                    
+                    dezenas.push(value);
                 }
-                
-                // Verificar duplicatas
-                if (dezenas.includes(value)) {
-                    alert.textContent = 'Não é permitido repetir números. Por favor, digite 6 números diferentes.';
-                    alert.className = 'alert alert-error';
-                    alert.style.display = 'flex';
-                    return;
-                }
-                
-                dezenas.push(value);
+            }
+            
+            // Validar quantidade de dezenas (6 a 10)
+            if (dezenas.length < 6) {
+                alert.textContent = 'É necessário no mínimo 6 dezenas para criar um jogo.';
+                alert.className = 'alert alert-error';
+                alert.style.display = 'flex';
+                return;
+            }
+            
+            if (dezenas.length > 10) {
+                alert.textContent = 'O número máximo de dezenas por jogo é 10.';
+                alert.className = 'alert alert-error';
+                alert.style.display = 'flex';
+                return;
             }
             
             // Ordenar dezenas
